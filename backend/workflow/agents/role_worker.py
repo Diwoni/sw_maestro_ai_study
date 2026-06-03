@@ -1,7 +1,7 @@
-import json
 import os
 from langchain_upstage import ChatUpstage
 from workflow.state import WorkerState
+from workflow.utils import call_llm_with_json_retry
 
 _llm = None
 
@@ -17,21 +17,18 @@ def _load_prompt() -> str:
         return f.read()
 
 def role_worker_node(state: WorkerState) -> dict:
-    print(f"[3/5] role_worker 실행 중... (직군: {state['role']})")
-    terms_list = "\n".join(
-        f"- {t['term']} (문맥: {t['context_snippet']})"
-        for t in state["ambiguous_terms"]
+    print(f"[3/6] role_worker 실행 중... (직군: {state['role']})")
+    words_list = "\n".join(
+        f"- {w['word']} (문맥: {w['context_snippet']})"
+        for w in state["extracted_words"]
     )
     prompt = _load_prompt().format(
         role=state["role"],
         input_text=state["input_text"],
         sender_role=state["sender_role"],
         receiver_role=", ".join(state["receiver_roles"]),
-        terms_list=terms_list,
+        words_list=words_list,
     )
-    response = _get_llm().invoke(prompt)
-    result = json.loads(response.content)
-    print(f"[3/5] role_worker 완료 (직군: {state['role']})")
-    return {
-        "role_interpretations": [result],
-    }
+    result = call_llm_with_json_retry(_get_llm(), prompt)
+    print(f"[3/6] role_worker 완료 (직군: {state['role']})")
+    return {"role_interpretations": [result]}
