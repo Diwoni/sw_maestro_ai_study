@@ -1,16 +1,8 @@
 import json
 import os
-from langchain_upstage import ChatUpstage
 from workflow.state import GraphState
 from workflow.utils import call_llm_with_json_retry
-
-_llm = None
-
-def _get_llm():
-    global _llm
-    if _llm is None:
-        _llm = ChatUpstage(model="solar-pro3-260323")
-    return _llm
+from workflow.llm import get_llm
 
 def _load_prompt() -> str:
     path = os.path.join(os.path.dirname(__file__), "../../prompts/synthesis.txt")
@@ -25,7 +17,7 @@ def synthesis_node(state: GraphState) -> dict:
         receiver_role=", ".join(state["receiver_roles"]),
         risk_terms=json.dumps(state["risk_terms"], ensure_ascii=False, indent=2),
     )
-    result = call_llm_with_json_retry(_get_llm(), prompt)
+    result = call_llm_with_json_retry(get_llm(), prompt)
     print("[5/6] synthesis 완료")
     return {
         "terms_with_risk": result.get("terms", []),

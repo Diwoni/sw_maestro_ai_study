@@ -1,15 +1,7 @@
 import os
-from langchain_upstage import ChatUpstage
 from workflow.state import GraphState
 from workflow.utils import call_llm_with_json_retry
-
-_llm = None
-
-def _get_llm():
-    global _llm
-    if _llm is None:
-        _llm = ChatUpstage(model="solar-pro3-260323")
-    return _llm
+from workflow.llm import get_llm
 
 def _load_prompt() -> str:
     path = os.path.join(os.path.dirname(__file__), "../../prompts/term_extractor.txt")
@@ -25,7 +17,7 @@ def term_extractor_node(state: GraphState) -> dict:
         input_type=context.get("inputType", state["communication_type"]),
         input_text=state["input_text"],
     )
-    result = call_llm_with_json_retry(_get_llm(), prompt)
+    result = call_llm_with_json_retry(get_llm(), prompt)
     words = result.get("words", [])
     print(f"[2/6] word_extractor 완료 — {len(words)}개 단어 추출")
     return {"extracted_words": words}
