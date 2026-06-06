@@ -112,16 +112,16 @@ export function ReportView({ report }: ReportViewProps) {
                     </td>
                     <td className="p-3 text-xs leading-6 text-muted">
                       <p>
-                        <strong className="text-ink">기획:</strong> {term.plannerView}
+                        <strong className="text-ink">기획:</strong> {term.plannerView ?? "해당 없음"}
                       </p>
                       <p>
-                        <strong className="text-ink">개발:</strong> {term.developerView}
+                        <strong className="text-ink">개발:</strong> {term.developerView ?? "해당 없음"}
                       </p>
                       <p>
-                        <strong className="text-ink">디자인:</strong> {term.designerView}
+                        <strong className="text-ink">디자인:</strong> {term.designerView ?? "해당 없음"}
                       </p>
                       <p>
-                        <strong className="text-ink">PM:</strong> {term.pmView}
+                        <strong className="text-ink">PM:</strong> {term.pmView ?? "해당 없음"}
                       </p>
                     </td>
                     <td className="w-36 p-3">

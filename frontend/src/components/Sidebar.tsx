@@ -1,7 +1,7 @@
-import { ClipboardList, FileText, GitBranch, MessageSquareText } from "lucide-react";
+import { ClipboardList, FileText, GitBranch, History, MessageSquareText } from "lucide-react";
 
-const steps = ["입력", "워크플로우", "보고서"];
-const icons = [MessageSquareText, GitBranch, FileText];
+const steps = ["입력", "워크플로우", "보고서", "분석 이력"];
+const icons = [MessageSquareText, GitBranch, FileText, History];
 
 export function Sidebar() {
   return (
@@ -34,9 +34,8 @@ export function Sidebar() {
           <ClipboardList className="h-4 w-4" />
           MVP 범위
         </p>
-        <p>POST /api/analyze 단일 API</p>
+        <p>분석 이력 목록/상세 조회</p>
         <p>텍스트 입력 기반 분석</p>
-        <p>test_cases 기반 mock demo</p>
         <p>보고서형 결과 출력</p>
       </div>
     </aside>

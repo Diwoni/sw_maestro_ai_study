@@ -109,10 +109,10 @@ function termsTable(terms: TermAnalysis[]) {
             textCell(`${term.context}\n${term.currentMeaning}\n${term.riskReason}`),
             textCell(
               [
-                `기획: ${term.plannerView}`,
-                `개발: ${term.developerView}`,
-                `디자인: ${term.designerView}`,
-                `PM: ${term.pmView}`,
+                `기획: ${term.plannerView ?? "해당 없음"}`,
+                `개발: ${term.developerView ?? "해당 없음"}`,
+                `디자인: ${term.designerView ?? "해당 없음"}`,
+                `PM: ${term.pmView ?? "해당 없음"}`,
               ].join("\n"),
             ),
             textCell(`${term.riskLevel}\n${term.confirmationQuestion}`),

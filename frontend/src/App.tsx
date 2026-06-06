@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, Server } from "lucide-react";
 import { analyzeText } from "./api/client";
 import { AnalyzeForm } from "./components/AnalyzeForm";
+import { AnalysisHistory } from "./components/AnalysisHistory";
 import { ReportView } from "./components/ReportView";
 import { Sidebar } from "./components/Sidebar";
 import { WorkflowStatus } from "./components/WorkflowStatus";
@@ -19,6 +20,7 @@ export default function App() {
   const [report, setReport] = useState<AnalyzeResponse | null>(null);
   const [state, setState] = useState<AnalyzeState>("idle");
   const [error, setError] = useState("");
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const handleAnalyze = async () => {
     if (!request.text.trim() || !request.communicationType) {
@@ -34,10 +36,17 @@ export default function App() {
       const response = await analyzeText(request);
       setReport(response);
       setState("success");
+      setHistoryRefreshKey((current) => current + 1);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "분석 중 오류가 발생했습니다.");
       setState("error");
     }
+  };
+
+  const handleHistorySelect = (selectedReport: AnalyzeResponse) => {
+    setReport(selectedReport);
+    setState("success");
+    setError("");
   };
 
   return (
@@ -53,8 +62,8 @@ export default function App() {
                 협업 텍스트 오해 가능 용어 분석
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-                MVP 범위를 POST /api/analyze 하나로 맞춘 React 프론트엔드입니다. 실제
-                백엔드 base URL이 없으면 MSW가 같은 API 요청을 가로채 응답합니다.
+                협업 텍스트 분석 결과와 완료된 분석 이력을 확인합니다. 실제 백엔드 base
+                URL이 없으면 MSW가 같은 API 요청을 가로채 응답합니다.
               </p>
             </div>
           </header>
@@ -70,6 +79,12 @@ export default function App() {
             <Server className="h-4 w-4 text-brand" />
             VITE_API_BASE_URL 미설정 시 mock mode로 동작
           </div>
+
+          <AnalysisHistory
+            refreshKey={historyRefreshKey}
+            onSelect={handleHistorySelect}
+            onError={setError}
+          />
 
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.7fr)]">
             <AnalyzeForm
