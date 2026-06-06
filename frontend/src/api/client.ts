@@ -3,8 +3,6 @@ import type { AnalyzeRequest, AnalyzeResponse, TestCase } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "";
 
-const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
-
 export function findMockCase(request: AnalyzeRequest): TestCase {
   const normalized = request.text.trim();
 
@@ -21,11 +19,6 @@ export function findMockCase(request: AnalyzeRequest): TestCase {
 
 export async function analyzeText(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   const mock = findMockCase(request);
-
-  if (!API_BASE_URL) {
-    await wait(850);
-    return mock.response;
-  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
@@ -48,7 +41,6 @@ export async function analyzeText(request: AnalyzeRequest): Promise<AnalyzeRespo
     };
   } catch (error) {
     console.warn("Falling back to mock analysis:", error);
-    await wait(400);
     return mock.response;
   }
 }
