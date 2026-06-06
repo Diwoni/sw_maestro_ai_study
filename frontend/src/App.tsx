@@ -1,32 +1,24 @@
-import { useMemo, useState } from "react";
-import { AlertTriangle, Database, Server } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, Server } from "lucide-react";
 import { analyzeText } from "./api/client";
 import { AnalyzeForm } from "./components/AnalyzeForm";
 import { ReportView } from "./components/ReportView";
 import { Sidebar } from "./components/Sidebar";
 import { WorkflowStatus } from "./components/WorkflowStatus";
-import { testCases } from "./data/testCases";
-import type { AnalyzeRequest, AnalyzeResponse, AnalyzeState, TestCase } from "./types";
+import type { AnalyzeRequest, AnalyzeResponse, AnalyzeState } from "./types";
 
-const initialCase = testCases[0];
+const initialRequest: AnalyzeRequest = {
+  text: "",
+  senderRole: "",
+  receiverRole: "",
+  communicationType: "",
+};
 
 export default function App() {
-  const [request, setRequest] = useState<AnalyzeRequest>(initialCase.request);
-  const [report, setReport] = useState<AnalyzeResponse | null>(initialCase.response);
-  const [state, setState] = useState<AnalyzeState>("success");
+  const [request, setRequest] = useState<AnalyzeRequest>(initialRequest);
+  const [report, setReport] = useState<AnalyzeResponse | null>(null);
+  const [state, setState] = useState<AnalyzeState>("idle");
   const [error, setError] = useState("");
-
-  const selectedCase = useMemo(
-    () => testCases.find((item) => item.request.text === request.text) ?? initialCase,
-    [request.text],
-  );
-
-  const handleSelectCase = (testCase: TestCase) => {
-    setRequest(testCase.request);
-    setReport(testCase.response);
-    setState("success");
-    setError("");
-  };
 
   const handleAnalyze = async () => {
     if (!request.text.trim() || !request.communicationType) {
@@ -62,16 +54,7 @@ export default function App() {
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
                 MVP 범위를 POST /api/analyze 하나로 맞춘 React 프론트엔드입니다. 실제
-                백엔드 base URL이 없으면 테스트케이스 mock으로 데모합니다.
-              </p>
-            </div>
-            <div className="rounded-lg border border-line bg-white px-4 py-3 text-right shadow-sm">
-              <p className="inline-flex items-center gap-1.5 text-xs font-bold text-muted">
-                <Database className="h-3.5 w-3.5" />
-                현재 시나리오
-              </p>
-              <p className="mt-1 text-sm font-black text-ink">
-                {selectedCase.id} · {selectedCase.scenarioName}
+                백엔드 base URL이 없으면 MSW가 같은 API 요청을 가로채 응답합니다.
               </p>
             </div>
           </header>
@@ -91,13 +74,11 @@ export default function App() {
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.7fr)]">
             <AnalyzeForm
               value={request}
-              testCases={testCases}
               isLoading={state === "loading"}
               onChange={setRequest}
               onSubmit={handleAnalyze}
-              onSelectCase={handleSelectCase}
             />
-            <WorkflowStatus state={state} route={report?.route ?? selectedCase.route} />
+            <WorkflowStatus state={state} route={report?.route} />
           </div>
 
           <div className="mt-6">

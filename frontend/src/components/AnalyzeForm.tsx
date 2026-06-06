@@ -1,24 +1,20 @@
 import type { ReactNode } from "react";
 import { Loader2, Play, Sparkles } from "lucide-react";
-import type { AnalyzeRequest, TestCase } from "../types";
+import type { AnalyzeRequest } from "../types";
 import { communicationTypes, roles } from "../utils";
 
 type AnalyzeFormProps = {
   value: AnalyzeRequest;
-  testCases: TestCase[];
   isLoading: boolean;
   onChange: (next: AnalyzeRequest) => void;
   onSubmit: () => void;
-  onSelectCase: (testCase: TestCase) => void;
 };
 
 export function AnalyzeForm({
   value,
-  testCases,
   isLoading,
   onChange,
   onSubmit,
-  onSelectCase,
 }: AnalyzeFormProps) {
   return (
     <section className="rounded-lg border border-line bg-white p-5 shadow-panel">
@@ -70,18 +66,9 @@ export function AnalyzeForm({
       </div>
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {testCases.slice(0, 4).map((testCase) => (
-            <button
-              key={testCase.id}
-              type="button"
-              className="rounded-full border border-line bg-white px-3 py-2 text-xs font-bold text-muted transition hover:border-brand hover:text-brand"
-              onClick={() => onSelectCase(testCase)}
-            >
-              {testCase.id} {testCase.scenarioName}
-            </button>
-          ))}
-        </div>
+        <p className="text-xs font-bold text-muted">
+          입력값 그대로 POST /api/analyze 요청을 보내고, 개발 모드에서는 MSW가 응답합니다.
+        </p>
         <button
           type="button"
           className="inline-flex items-center gap-2 rounded-lg bg-brand px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
