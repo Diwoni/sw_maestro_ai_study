@@ -29,7 +29,16 @@ VITE_ENABLE_MSW=false
 ```
 
 폼에 직접 입력한 뒤 “분석 시작”을 누르면 브라우저 네트워크 탭에서
-`POST /api/analyze` 요청과 MSW 응답을 확인할 수 있습니다.
+`POST /api/analyze` 요청, `job_id` 응답, SSE 스트림 요청을 확인할 수 있습니다.
+
+## SSE 분석 진행
+
+분석 시작 시 `POST /api/analyze`로 `job_id`를 받은 뒤
+`GET /api/analyze/{job_id}/stream`에 연결합니다.
+`progress` 이벤트는 Agent Workflow 진행 화면에 반영하고,
+`done` 이벤트의 `result`를 최종 보고서로 표시합니다.
+
+개발 모드의 MSW도 같은 계약으로 `job_id`, 단계별 `progress`, 최종 `done` 이벤트를 반환합니다.
 
 ## 보고서 내보내기
 
