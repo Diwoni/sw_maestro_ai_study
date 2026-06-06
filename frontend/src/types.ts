@@ -14,10 +14,10 @@ export type TermAnalysis = {
   term: string;
   context: string;
   currentMeaning: string;
-  plannerView: string;
-  developerView: string;
-  designerView: string;
-  pmView: string;
+  plannerView: string | null;
+  developerView: string | null;
+  designerView: string | null;
+  pmView: string | null;
   riskLevel: "낮음" | "보통" | "높음" | string;
   riskReason: string;
   confirmationQuestion: string;
@@ -31,6 +31,14 @@ export type AnalyzeResponse = {
   checklist: string[];
   route?: RouteType;
   message?: string;
+};
+
+export type AnalysisHistoryItem = {
+  id: string;
+  summary: string;
+  keyRequest: string;
+  senderRole: string;
+  createdAt: string;
 };
 
 export type TestCase = {

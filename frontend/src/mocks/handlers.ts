@@ -1,6 +1,15 @@
 import { delay, http, HttpResponse } from "msw";
 import { findMockCase } from "../api/client";
-import type { AnalyzeRequest } from "../types";
+import { testCases } from "../data/testCases";
+import type { AnalysisHistoryItem, AnalyzeRequest } from "../types";
+
+const mockHistory: AnalysisHistoryItem[] = testCases.slice(0, 5).map((testCase, index) => ({
+  id: testCase.id,
+  summary: testCase.response.summary,
+  keyRequest: testCase.response.keyRequest,
+  senderRole: testCase.request.senderRole || "직군 미상",
+  createdAt: new Date(Date.now() - index * 60 * 60 * 1000).toISOString(),
+}));
 
 export const handlers = [
   http.post("*/api/analyze", async ({ request }) => {
@@ -23,6 +32,21 @@ export const handlers = [
     });
 
     await delay(650);
+
+    return HttpResponse.json(mockCase.response);
+  }),
+  http.get("*/api/analyses", async () => {
+    await delay(250);
+    return HttpResponse.json(mockHistory);
+  }),
+  http.get("*/api/analyses/:id", async ({ params }) => {
+    const mockCase = testCases.find((testCase) => testCase.id === params.id);
+
+    await delay(250);
+
+    if (!mockCase) {
+      return HttpResponse.json({ detail: "존재하지 않는 분석 ID입니다." }, { status: 404 });
+    }
 
     return HttpResponse.json(mockCase.response);
   }),

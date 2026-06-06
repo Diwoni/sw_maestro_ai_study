@@ -1,5 +1,10 @@
 import { testCases } from "../data/testCases";
-import type { AnalyzeRequest, AnalyzeResponse, TestCase } from "../types";
+import type {
+  AnalysisHistoryItem,
+  AnalyzeRequest,
+  AnalyzeResponse,
+  TestCase,
+} from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -43,4 +48,40 @@ export async function analyzeText(request: AnalyzeRequest): Promise<AnalyzeRespo
     console.warn("Falling back to mock analysis:", error);
     return mock.response;
   }
+}
+
+export async function getAnalyses(): Promise<AnalysisHistoryItem[]> {
+  const response = await fetch(`${API_BASE_URL}/api/analyses`);
+  const body = (await response.json()) as AnalysisHistoryItem[] | { detail?: string; message?: string };
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body, "분석 이력을 불러오지 못했습니다."));
+  }
+
+  return body as AnalysisHistoryItem[];
+}
+
+export async function getAnalysis(id: string): Promise<AnalyzeResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${encodeURIComponent(id)}`);
+  const body = (await response.json()) as AnalyzeResponse | { detail?: string; message?: string };
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body, "분석 상세를 불러오지 못했습니다."));
+  }
+
+  return body as AnalyzeResponse;
+}
+
+function getErrorMessage(body: unknown, fallback: string) {
+  if (typeof body === "object" && body !== null) {
+    if ("detail" in body && typeof body.detail === "string") {
+      return body.detail;
+    }
+
+    if ("message" in body && typeof body.message === "string") {
+      return body.message;
+    }
+  }
+
+  return fallback;
 }
