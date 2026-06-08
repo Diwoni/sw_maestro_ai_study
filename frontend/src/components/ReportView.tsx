@@ -14,6 +14,7 @@ export function ReportView({
   emptyMessage = "분석이 끝나면 합의 질문과 체크리스트가 이곳에 정리됩니다.",
 }: ReportViewProps) {
   const [isDocxExporting, setIsDocxExporting] = useState(false);
+  const [isPdfPreparing, setIsPdfPreparing] = useState(false);
 
   if (!report) {
     return (
@@ -53,6 +54,30 @@ export function ReportView({
     }
   };
 
+  const handlePdfSave = async () => {
+    const originalTitle = document.title;
+    const reportTitle = `ContextBridge-분석리포트-${toDateStamp()}`;
+
+    setIsPdfPreparing(true);
+    document.title = reportTitle;
+
+    const restorePage = () => {
+      document.title = originalTitle;
+      setIsPdfPreparing(false);
+    };
+
+    window.addEventListener("afterprint", restorePage, { once: true });
+
+    try {
+      await document.fonts?.ready;
+      await waitForPaint();
+      window.print();
+    } catch {
+      window.removeEventListener("afterprint", restorePage);
+      restorePage();
+    }
+  };
+
   return (
     <section id="main-report" className="print-report report-paper border border-line/80 bg-white">
       <div className="grid border-b border-line lg:grid-cols-[1fr_auto]">
@@ -73,12 +98,17 @@ export function ReportView({
           <div className="print-hidden flex gap-2">
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => void handlePdfSave()}
+              disabled={isPdfPreparing}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-action/25 bg-white px-3 py-2.5 text-xs font-semibold text-action transition-all duration-300 hover:border-action hover:bg-action-soft active:scale-[0.98]"
               title="보고서 영역만 인쇄하거나 PDF로 저장합니다."
             >
-              <Printer className="h-4 w-4" strokeWidth={1.8} />
-              PDF 저장
+              {isPdfPreparing ? (
+                <Download className="h-4 w-4 animate-pulse" strokeWidth={1.8} />
+              ) : (
+                <Printer className="h-4 w-4" strokeWidth={1.8} />
+              )}
+              {isPdfPreparing ? "준비 중" : "PDF 저장"}
             </button>
             <button
               type="button"
@@ -111,8 +141,8 @@ export function ReportView({
 
         {report.terms.length > 0 ? (
           <ReportSection number="03" title="오해 가능 용어 분석" spacious>
-            <div className="overflow-x-auto rounded-3xl border border-line">
-              <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+            <div className="report-table-wrap overflow-x-auto rounded-3xl border border-line">
+              <table className="report-table w-full min-w-[900px] border-collapse text-left text-sm">
                 <thead className="bg-[#686fce] text-[10px] font-semibold uppercase tracking-[0.12em] text-white/85">
                   <tr>
                     <th className="p-4 font-semibold">용어</th>
@@ -202,8 +232,8 @@ function ReportSection({
     <section
       className={
         spacious
-          ? "mt-10"
-          : "rounded-3xl border border-[#e8e9f5] bg-[#fafaff] p-5 sm:p-6"
+          ? "report-terms-section mt-10"
+          : "print-keep-together rounded-3xl border border-[#e8e9f5] bg-[#fafaff] p-5 sm:p-6"
       }
     >
       <div className="mb-5 flex items-baseline gap-3">
@@ -228,7 +258,7 @@ function ListSection({
 }) {
   return (
     <section
-      className={`rounded-3xl border p-5 sm:p-6 ${
+      className={`print-keep-together rounded-3xl border p-5 sm:p-6 ${
         accent
           ? "border-amber-200 bg-amber-50/70"
           : "border-emerald-200 bg-emerald-50/70"
@@ -281,4 +311,16 @@ function Metric({ label, value }: { label: string; value: number }) {
       </p>
     </div>
   );
+}
+
+function waitForPaint() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+function toDateStamp() {
+  return new Date().toISOString().slice(0, 10);
 }
